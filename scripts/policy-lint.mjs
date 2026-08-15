@@ -9,12 +9,17 @@ import { getPolicyViolations } from "../src/lib/validation/policyGuard.ts";
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 
-const SCAN_DIRS = ["src", "spec"];
+const SCAN_DIRS = ["src", "spec", "scripts"];
 const SCAN_EXTENSIONS = new Set([".ts", ".tsx", ".md", ".json"]);
-const EXCLUDE_DIR_NAMES = new Set(["node_modules", "__tests__"]);
+// 빌드 산출물·의존성·테스트 픽스처 디렉터리는 스캔 대상에서 제외한다.
+const EXCLUDE_DIR_NAMES = new Set(["node_modules", "__tests__", ".next", "dist", "build", "out"]);
 
-// 금지 키워드 사전의 단일 출처 파일 — 자기 자신을 스캔 대상에서 제외한다.
-const EXCLUDE_FILES = new Set([path.join(ROOT, "src", "lib", "validation", "policyGuard.ts")]);
+// 정책 린트 자신의 스크립트·사전 파일("policy-*")은 스캔 대상에서 제외한다.
+// 사전 파일은 금지 키워드를 목록 그대로 담고 있어 스캔하면 항상 자기 자신을 검출해
+// exit 1로 실패하는 자기참조 실패가 발생한다.
+function isSelfReferenceFile(fullPath) {
+  return path.dirname(fullPath) === path.join(ROOT, "scripts") && path.basename(fullPath).startsWith("policy-");
+}
 
 function collectFiles(dir, files = []) {
   for (const entry of readdirSync(dir)) {
@@ -27,7 +32,7 @@ function collectFiles(dir, files = []) {
       continue;
     }
 
-    if (EXCLUDE_FILES.has(fullPath)) continue;
+    if (isSelfReferenceFile(fullPath)) continue;
     if (SCAN_EXTENSIONS.has(path.extname(entry))) files.push(fullPath);
   }
   return files;
