@@ -304,7 +304,7 @@ function findInFiles(dir: string, keyword: string): string[] {
     const entries = fs.readdirSync(currentPath, { withFileTypes: true });
     entries.forEach((entry) => {
       if (entry.isDirectory()) {
-        if (!entry.name.startsWith(".") && entry.name !== "node_modules") {
+        if (!entry.name.startsWith(".") && entry.name !== "node_modules" && entry.name !== "__tests__") {
           walk(path.join(currentPath, entry.name));
         }
       } else if (entry.name.endsWith(".ts") || entry.name.endsWith(".tsx")) {
@@ -333,7 +333,7 @@ function findExportedFunction(dir: string, functionName: string): string[] {
     const entries = fs.readdirSync(currentPath, { withFileTypes: true });
     entries.forEach((entry) => {
       if (entry.isDirectory()) {
-        if (!entry.name.startsWith(".") && entry.name !== "node_modules") {
+        if (!entry.name.startsWith(".") && entry.name !== "node_modules" && entry.name !== "__tests__") {
           walk(path.join(currentPath, entry.name));
         }
       } else if (entry.name.endsWith(".ts") || entry.name.endsWith(".tsx")) {
@@ -360,7 +360,7 @@ function findImportsFrom(dir: string, modules: string[]): string[] {
     const entries = fs.readdirSync(currentPath, { withFileTypes: true });
     entries.forEach((entry) => {
       if (entry.isDirectory()) {
-        if (!entry.name.startsWith(".") && entry.name !== "node_modules") {
+        if (!entry.name.startsWith(".") && entry.name !== "node_modules" && entry.name !== "__tests__") {
           walk(path.join(currentPath, entry.name));
         }
       } else if (entry.name.endsWith(".ts") || entry.name.endsWith(".tsx")) {
@@ -386,7 +386,7 @@ function findInFilesContent(dir: string, pattern: RegExp): string[] {
     const entries = fs.readdirSync(currentPath, { withFileTypes: true });
     entries.forEach((entry) => {
       if (entry.isDirectory()) {
-        if (!entry.name.startsWith(".") && entry.name !== "node_modules") {
+        if (!entry.name.startsWith(".") && entry.name !== "node_modules" && entry.name !== "__tests__") {
           walk(path.join(currentPath, entry.name));
         }
       } else if (entry.name.endsWith(".ts") || entry.name.endsWith(".tsx")) {

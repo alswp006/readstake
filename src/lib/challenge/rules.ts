@@ -43,7 +43,7 @@ export function awardPoints(params: AwardPointsParams): { participantId: string;
   return { participantId: params.participantId, points: rule.basePoints };
 }
 
-// 완독 성공/실패 판정. 실패자는 penalty 없이 points=0, badge 없음으로만 처리한다.
+// 완독 성공/실패 판정. 실패자는 아무런 불이익 없이 points=0, badge 없음으로만 처리한다.
 export function resolveChallengeOutcome(
   participant: Pick<Participant, "id" | "completionRate">
 ): ChallengeCompletionResult {
@@ -67,6 +67,18 @@ export function resolveChallengeOutcome(
     status: "failed",
     completionRate: participant.completionRate,
     pointsAwarded: 0,
+  };
+}
+
+// 누적 읽은 분량과 목표 분량만으로 완독 여부·지급 포인트를 계산한다. 실패해도 points는 0일 뿐 음수로 내려가지 않는다.
+export function calculateCompletion(
+  unitsRead: number,
+  targetUnits: number
+): { completed: boolean; points: number } {
+  const completed = unitsRead >= targetUnits;
+  return {
+    completed,
+    points: completed ? POINT_RULES.challenge_completion.basePoints : 0,
   };
 }
 
