@@ -227,8 +227,10 @@ describe("도메인 재정의: 예치금·정산 제거하고 비금전 챌린�
         { id: "part-3", status: "active", points: 100, failed: true },
       ];
 
+      type BulkParticipant = (typeof participants)[number];
+
       function handleBulkChallengeEnd(
-        participants: typeof participants,
+        participants: BulkParticipant[],
         failureIds: string[]
       ) {
         return participants.map((p) => ({
