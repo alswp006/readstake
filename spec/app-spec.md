@@ -21,7 +21,7 @@
 
 ### RewardPoint
 - `id`, `userId`, `pointAmount`, `awardedAt`, `source`, `nonRefundable`(항상 true)
-- 앱 내부 전용 비환금 포인트. 현금 환전·출금·타인 양도가 불가능하다.
+- 앱 내부 전용 비현금성 포인트. 현금화·인출·타인 양도가 불가능하다.
 
 ### Badge
 - `id`, `participantId`, `challengeId`, `label`, `awardedAt`
@@ -46,10 +46,10 @@
 ### 포인트 정책 (`REWARD_POINT_POLICY`)
 - `nonRefundable`, `nonCashable`, `nonTransferable`: 항상 true
 - `redemptionEnabled`, `cashoutEnabled`: 항상 false
-- 환전/출금/양도 API는 존재하지 않는다.
+- 현금화·인출·양도 API는 존재하지 않는다.
 
 ## 배제된 개념 (이 스펙에서 명시적으로 제외)
 아래와 같은 개념·필드·함수·SDK 연동은 이 도메인에 존재하지 않는다:
 - 금전적 자산을 걸고·모으고·나눠 갖는 모든 개념(참가비 성격의 자산, 참가자 풀 자산의 회수·재분배)
 - 참가자 간 자산/포인트 이체 로직(`transferBetweenParticipants`, `transferPoints`, `transferFunds` 등)
-- 결제/송금 SDK 호출(토스페이 등 외부 결제 연동)
+- 결제·이체 SDK 호출(토스페이 등 외부 결제 연동)

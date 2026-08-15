@@ -1,0 +1,17 @@
+{
+  "name": "readstake",
+  "private": true,
+  "version": "0.0.1",
+  "type": "module",
+  "scripts": {
+    "policy-lint": "node scripts/policy-lint.mjs",
+    "prebuild": "npm run policy-lint",
+    "build": "vite build",
+    "test": "vitest run",
+    "typecheck": "tsc --noEmit"
+  },
+  "devDependencies": {
+    "typescript": "^5.6.3",
+    "vitest": "^2.1.4"
+  }
+}
