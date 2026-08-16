@@ -106,3 +106,4 @@ CRITICAL: Before creating any new function, type, or component, check the list a
 - heal-2-01: 금전 도메인 원자적 제거: 타입·스토어·lib·모든 참조·테스트를 한 패킷에서 동시에 GREEN화 (files: src/types/index.ts, src/store/useAppStore.ts, src/lib/rewards.ts, src/lib/api.ts, src/constants/index.ts, src/__tests__/rewards.test.ts)
 - heal-2-03: 정책 셀프체크 스크립트 추가(순수 정적 검사, 실행 범위 최소화) (files: scripts/policy-check.mjs, package.json, src/pages/Settings.tsx)
 - heal-2-02: 습관 트래커 화면 재구성: 금전 UI 제거 후 목표→체크→진행률→배지 흐름 완성 (files: src/pages/Home.tsx, src/pages/Goal.tsx, src/pages/Stats.tsx, src/pages/Badges.tsx, src/App.tsx, src/components)
+- heal-1-01: 금전 예치·상금풀·정산 도메인 전면 제거 및 비금전 포인트 모델로 치환 (files: src/types/index.ts, src/store/useAppStore.ts, src/lib/rewards.ts, src/lib/api.ts, src/constants/index.ts)
