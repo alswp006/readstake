@@ -1,0 +1,24 @@
+/**
+ * 패킷 간 인터페이스 계약 — 자동 생성. **수정하지 마라.**
+ *
+ * 기반 패킷은 여기 선언된 모양 그대로 구현하고, 화면 패킷은 여기 적힌 이름·인자·반환
+ * 타입을 그대로 가정해도 된다. 추측이 어긋나 병합에서 무너지는 것을 막기 위한 파일이다.
+ */
+
+export type User = { id: string; name: string; points: number; level: number; completedChallenges: number; createdAt: string };
+
+export type Challenge = { id: string; title: string; description: string; category: string; difficulty: 'easy' | 'medium' | 'hard'; durationDays: number; pointsReward: number };
+
+export type ChallengeResult = { id: string; challengeId: string; userId: string; completedAt: string; pointsEarned: number };
+
+export type LeaderboardEntry = { userId: string; userName: string; points: number; level: number };
+
+export type useAppStoreFn = () => { user: User | null; challenges: Challenge[]; results: ChallengeResult[]; loading: boolean; error: string | null; completeChallenge: (challengeId: string) => Promise<void>; loadChallenges: () => Promise<void>; setUser: (user: User) => void };
+
+export type getChallengesFn = () => Promise<Challenge[]>;
+
+export type submitChallengeResultFn = (challengeId: string) => Promise<ChallengeResult>;
+
+export type getLeaderboardFn = () => Promise<LeaderboardEntry[]>;
+
+export type validatePolicyComplianceFn = (text: string) => { valid: boolean; violations?: string[] };
