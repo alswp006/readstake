@@ -16,3 +16,29 @@ export function EmptyState({ title, description, action, testId }: EmptyStatePro
     </div>
   );
 }
+
+type LoadingStateProps = {
+  lines?: number;
+  testId?: string;
+};
+
+export function LoadingState({ lines = 3, testId }: LoadingStateProps) {
+  return (
+    <div
+      data-testid={testId ?? "loading-state"}
+      style={{ display: "flex", flexDirection: "column", gap: 12, padding: "8px 0" }}
+    >
+      {Array.from({ length: lines }, (_, index) => (
+        <div
+          key={index}
+          style={{
+            height: 16,
+            borderRadius: 8,
+            backgroundColor: "#f2f4f6",
+            width: index === lines - 1 ? "60%" : "100%",
+          }}
+        />
+      ))}
+    </div>
+  );
+}
