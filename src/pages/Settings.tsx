@@ -69,7 +69,12 @@ export default function Settings() {
               목표를 저장했어요
             </Paragraph.Text>
           )}
-          <Button display="block" data-testid="settings-goal-save-button" onClick={handleSave} loading={loading}>
+          <Button
+            display="block"
+            data-testid="settings-goal-save-button"
+            onClick={handleSave}
+            loading={loading || undefined}
+          >
             목표 저장
           </Button>
         </div>

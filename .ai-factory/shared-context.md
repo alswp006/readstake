@@ -107,3 +107,4 @@ CRITICAL: Before creating any new function, type, or component, check the list a
 - heal-2-03: 정책 셀프체크 스크립트 추가(순수 정적 검사, 실행 범위 최소화) (files: scripts/policy-check.mjs, package.json, src/pages/Settings.tsx)
 - heal-2-02: 습관 트래커 화면 재구성: 금전 UI 제거 후 목표→체크→진행률→배지 흐름 완성 (files: src/pages/Home.tsx, src/pages/Goal.tsx, src/pages/Stats.tsx, src/pages/Badges.tsx, src/App.tsx, src/components)
 - heal-1-01: 금전 예치·상금풀·정산 도메인 전면 제거 및 비금전 포인트 모델로 치환 (files: src/types/index.ts, src/store/useAppStore.ts, src/lib/rewards.ts, src/lib/api.ts, src/constants/index.ts)
+- heal-1-02: 화면·문구에서 금전/경쟁적 금전이전 UX 제거, 습관 트래커 UX로 재구성 (files: src/pages/Home.tsx, src/pages/Challenge.tsx, src/pages/Result.tsx, src/pages/Ranking.tsx, src/components/*.tsx)
