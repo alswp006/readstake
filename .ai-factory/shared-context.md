@@ -72,6 +72,7 @@ export type getPolicyViolationsFn = (content: string) => { type: 'gambling' | 'f
     api.ts
     contract.ts
     rewards.ts
+  main.tsx
   pages/
     Challenge.tsx
     Home.tsx
@@ -97,3 +98,4 @@ CRITICAL: Before creating any new function, type, or component, check the list a
 
 ## Already Implemented (do NOT duplicate or overwrite)
 - heal-2-01: 금전 도메인 원자적 제거: 타입·스토어·lib·모든 참조·테스트를 한 패킷에서 동시에 GREEN화 (files: src/types/index.ts, src/store/useAppStore.ts, src/lib/rewards.ts, src/lib/api.ts, src/constants/index.ts, src/__tests__/rewards.test.ts)
+- heal-2-03: 정책 셀프체크 스크립트 추가(순수 정적 검사, 실행 범위 최소화) (files: scripts/policy-check.mjs, package.json, src/pages/Settings.tsx)
