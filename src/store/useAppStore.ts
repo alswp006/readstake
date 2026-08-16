@@ -1,38 +1,33 @@
 import { useSyncExternalStore } from "react";
-import type { User, Challenge, ChallengeResult } from "../lib/contract";
-import { getChallenges, submitChallengeResult } from "../lib/api";
-import { calculateLevel } from "../lib/rewards";
-import { STORAGE_KEYS } from "../constants";
+import type { Goal, DailyLog, UserStats, Badge } from "../types";
+import { getGoals, saveGoalRecord, getLogs, saveLog } from "../lib/api";
+import { calcStreak, earnedBadges } from "../lib/rewards";
+import { LEVEL_XP_TABLE, XP_PER_CHECK } from "../constants";
 
 type AppState = {
-  user: User | null;
-  challenges: Challenge[];
-  results: ChallengeResult[];
+  goals: Goal[];
+  logs: DailyLog[];
+  stats: UserStats;
   loading: boolean;
   error: string | null;
 };
 
-function loadInitialUser(): User | null {
-  try {
-    const raw = localStorage.getItem(STORAGE_KEYS.user);
-    return raw ? (JSON.parse(raw) as User) : null;
-  } catch {
-    return null;
-  }
+function calcLevel(xp: number): number {
+  let level = 1;
+  LEVEL_XP_TABLE.forEach((threshold, index) => {
+    if (xp >= threshold) level = index + 1;
+  });
+  return level;
 }
 
-function persistUser(user: User): void {
-  try {
-    localStorage.setItem(STORAGE_KEYS.user, JSON.stringify(user));
-  } catch {
-    // localStorage 접근 불가 시 조용히 무시 (프라이버시 모드 등)
-  }
+function todayDate(): string {
+  return new Date().toISOString().slice(0, 10);
 }
 
 let state: AppState = {
-  user: loadInitialUser(),
-  challenges: [],
-  results: [],
+  goals: [],
+  logs: [],
+  stats: { xp: 0, level: 1, streak: { current: 0, best: 0, lastCheckedDate: null }, badges: [] },
   loading: false,
   error: null,
 };
@@ -53,52 +48,71 @@ function getSnapshot(): AppState {
   return state;
 }
 
-async function loadChallenges(): Promise<void> {
+async function loadGoals(): Promise<void> {
   setState({ loading: true, error: null });
   try {
-    const challenges = await getChallenges();
-    setState({ challenges, loading: false });
+    const [goals, logs] = await Promise.all([getGoals(), getLogs()]);
+    const streak = calcStreak(logs, todayDate());
+    const xp = logs.filter((log) => log.completed).length * XP_PER_CHECK;
+    const stats: UserStats = { xp, level: calcLevel(xp), streak, badges: [] };
+    setState({ goals, logs, stats: { ...stats, badges: earnedBadges(stats) }, loading: false });
   } catch {
-    setState({ loading: false, error: "챌린지를 불러오지 못했어요" });
+    setState({ loading: false, error: "목표를 불러오지 못했어요" });
   }
 }
 
-async function completeChallenge(challengeId: string): Promise<void> {
+async function setGoal(goal: Goal): Promise<void> {
   setState({ loading: true, error: null });
   try {
-    const result = await submitChallengeResult(challengeId);
-    const results = [...state.results, result];
-    const totalXp = results.reduce((sum, item) => sum + item.pointsEarned, 0);
-    const user: User | null = state.user
-      ? {
-          ...state.user,
-          points: totalXp,
-          level: calculateLevel(totalXp),
-          completedChallenges: state.user.completedChallenges + 1,
-        }
-      : null;
-    if (user) persistUser(user);
-    setState({ results, user, loading: false });
+    await saveGoalRecord(goal);
+    setState({ goals: [goal], loading: false });
   } catch {
-    setState({ loading: false, error: "완료 처리에 실패했어요" });
+    setState({ loading: false, error: "목표 저장에 실패했어요" });
   }
 }
 
-function setUser(user: User): void {
-  persistUser(user);
-  setState({ user });
+async function checkToday(pagesRead: number): Promise<DailyLog> {
+  setState({ loading: true, error: null });
+  const goal = state.goals[0];
+  const today = todayDate();
+  const completed = goal ? pagesRead >= goal.dailyTargetPages : pagesRead > 0;
+  const log: DailyLog = { date: today, pagesRead, completed };
+  try {
+    await saveLog(log);
+    const logs = [...state.logs.filter((item) => item.date !== log.date), log];
+    const streak = calcStreak(logs, today);
+    const xp = state.stats.xp + (completed ? XP_PER_CHECK : 0);
+    const nextStats: UserStats = { xp, level: calcLevel(xp), streak, badges: state.stats.badges };
+    setState({ logs, stats: { ...nextStats, badges: earnedBadges(nextStats) }, loading: false });
+    return log;
+  } catch {
+    setState({ loading: false, error: "기록 저장에 실패했어요" });
+    return log;
+  }
+}
+
+function resetStreakIfMissed(today: string): void {
+  const streak = calcStreak(state.logs, today);
+  setState({ stats: { ...state.stats, streak } });
+}
+
+function grantBadge(badge: Badge): void {
+  if (state.stats.badges.some((existing) => existing.id === badge.id)) return;
+  setState({ stats: { ...state.stats, badges: [...state.stats.badges, badge] } });
 }
 
 export function useAppStore() {
   const snapshot = useSyncExternalStore(subscribe, getSnapshot, getSnapshot);
   return {
-    user: snapshot.user,
-    challenges: snapshot.challenges,
-    results: snapshot.results,
+    goals: snapshot.goals,
+    logs: snapshot.logs,
+    stats: snapshot.stats,
     loading: snapshot.loading,
     error: snapshot.error,
-    completeChallenge,
-    loadChallenges,
-    setUser,
+    loadGoals,
+    setGoal,
+    checkToday,
+    resetStreakIfMissed,
+    grantBadge,
   };
 }

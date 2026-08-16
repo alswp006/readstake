@@ -8,23 +8,23 @@ import { useAppStore } from "../store/useAppStore";
 
 export default function Challenge() {
   const navigate = useNavigate();
-  const { challenges, completeChallenge, error, loadChallenges } = useAppStore();
-  const todayChallenge = challenges[0];
+  const { goals, checkToday, error, loadGoals } = useAppStore();
+  const activeGoal = goals[0];
 
   useEffect(() => {
-    if (challenges.length === 0) {
-      loadChallenges();
+    if (goals.length === 0) {
+      loadGoals();
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   async function handleCheck() {
-    if (!todayChallenge) return;
-    await completeChallenge(todayChallenge.id);
+    if (!activeGoal) return;
+    await checkToday(activeGoal.dailyTargetPages);
     navigate("/result");
   }
 
-  if (!todayChallenge) {
+  if (!activeGoal) {
     return (
       <ScreenScaffold top={<Top title={<Top.TitleParagraph>오늘의 기록</Top.TitleParagraph>} />}>
         <EmptyState
@@ -44,10 +44,10 @@ export default function Challenge() {
     <ScreenScaffold top={<Top title={<Top.TitleParagraph>오늘의 기록</Top.TitleParagraph>} />}>
       <Card>
         <Paragraph.Text typography="t4" fontWeight="bold">
-          {todayChallenge.title}
+          {activeGoal.title}
         </Paragraph.Text>
         <Paragraph.Text typography="t6" color="grey600">
-          {todayChallenge.description}
+          하루 목표 {activeGoal.dailyTargetPages}쪽
         </Paragraph.Text>
       </Card>
       {error && (

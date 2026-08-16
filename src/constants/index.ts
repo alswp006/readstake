@@ -1,17 +1,22 @@
-import type { Challenge } from "../lib/contract";
-
-export const XP_BY_DIFFICULTY: Record<Challenge["difficulty"], number> = {
-  easy: 10,
-  medium: 20,
-  hard: 35,
+export type BadgeDef = {
+  id: string;
+  name: string;
+  description: string;
+  streakThreshold?: number;
+  xpThreshold?: number;
 };
 
-export const LEVEL_XP_STEP = 100;
-export const STREAK_BADGE_THRESHOLD = 7;
-export const COMPLETION_BADGE_THRESHOLD = 10;
+export const BADGE_DEFS: BadgeDef[] = [
+  { id: "streak-week", name: "일주일 연속 기록", description: "7일 연속으로 읽었어요", streakThreshold: 7 },
+  { id: "streak-month", name: "한 달 연속 기록", description: "30일 연속으로 읽었어요", streakThreshold: 30 },
+  { id: "xp-milestone", name: "누적 경험치 마스터", description: "경험치 500을 모았어요", xpThreshold: 500 },
+];
+
+export const LEVEL_XP_TABLE = [0, 100, 250, 450, 700, 1000];
+
+export const XP_PER_CHECK = 10;
 
 export const STORAGE_KEYS = {
-  user: "challenge_user",
-  challenges: "challenge_challenges",
-  results: "challenge_results",
+  goals: "reading_goals",
+  logs: "reading_logs",
 } as const;

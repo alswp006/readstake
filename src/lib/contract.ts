@@ -5,41 +5,46 @@
  * 타입을 그대로 가정해도 된다. 추측이 어긋나 병합에서 무너지는 것을 막기 위한 파일이다.
  */
 
-/** 사용자 프로필 (금전 제거됨) (구현: 패킷 heal-1-01) */
-export type User = { id: string; email: string; pointBalance: number; totalPointsEarned: number };
+/** 독서 목표 엔티티 (금전 없음) (구현: 패킷 heal-2-01) */
+export type Goal = { id: string; title: string; dailyTargetPages: number };
 
-/** 습관 추적 엔티티 (구현: 패킷 heal-1-01) */
-export type Habit = { id: string; userId: string; name: string; category: string; targetDays: number; completedDays: number; currentStreak: number; createdAt: string };
+/** 하루 독서 기록 (구현: 패킷 heal-2-01) */
+export type DailyLog = { date: string; pagesRead: number; completed: boolean };
 
-/** 목표 엔티티 (구현: 패킷 heal-1-01) */
-export type Goal = { id: string; userId: string; title: string; habitIds: string[]; status: 'active' | 'completed' | 'paused'; progress: number; createdAt: string };
+/** 진행률 (구현: 패킷 heal-2-01) */
+export type Progress = { percent: number; totalDays: number };
 
-/** 배지/업적 엔티티 (구현: 패킷 heal-1-01) */
-export type Badge = { id: string; name: string; description: string; icon: string; pointsRequired: number };
+/** 연속 기록 (구현: 패킷 heal-2-01) */
+export type Streak = { current: number; best: number; lastCheckedDate: string | null };
 
-/** 습관 체크인 기록 (구현: 패킷 heal-1-01) */
-export type HabitCheckIn = { id: string; habitId: string; date: string; completed: boolean };
+/** 배지/업적 (구현: 패킷 heal-2-01) */
+export type Badge = { id: string; name: string; description: string; achievedAt: string };
 
-/** 스토어 상태 + 액션 (구현: 패킷 heal-1-01) */
-export type AppState = { user: User; habits: Habit[]; goals: Goal[]; badges: Badge[]; checkHabit: (habitId: string, date: string) => Promise<HabitCheckIn>; saveGoal: (goal: Goal) => Promise<Goal>; addPoints: (userId: string, amount: number) => Promise<void>; awardBadge: (userId: string, badgeId: string) => Promise<void> };
+/** 비금전 사용자 보상 요약 (구현: 패킷 heal-2-01) */
+export type UserStats = { xp: number; level: number; streak: Streak; badges: Badge[] };
 
-/** Zustand 스토어 훅 (구현: 패킷 heal-1-01) */
+/** 스토어 상태 + 액션 (구현: 패킷 heal-2-01) */
+export type AppState = {
+  goals: Goal[];
+  logs: DailyLog[];
+  stats: UserStats;
+  setGoal: (goal: Goal) => Promise<void>;
+  checkToday: (pagesRead: number) => Promise<DailyLog>;
+  resetStreakIfMissed: (today: string) => void;
+  grantBadge: (badge: Badge) => void;
+};
+
+/** Zustand 스타일 스토어 훅 (구현: 패킷 heal-2-01) */
 export type useAppStoreFn = () => AppState;
 
-/** 포인트 포맷팅 (UI 표시용) (구현: 패킷 heal-1-01) */
-export type formatPointsFn = (points: number) => string;
+/** 진행률 계산 순수 함수 (구현: 패킷 heal-2-01) */
+export type calcProgressFn = (logs: DailyLog[], goal: Goal) => Progress;
 
-/** 진행률 계산 (0-100) (구현: 패킷 heal-1-01) */
-export type calculateProgressFn = (completed: number, target: number) => number;
+/** 연속 기록 계산 순수 함수 (구현: 패킷 heal-2-01) */
+export type calcStreakFn = (logs: DailyLog[], today: string) => Streak;
 
-/** 연속 기록 계산 (구현: 패킷 heal-1-01) */
-export type getStreakFn = (habit: Habit) => number;
-
-/** 습관 체크인당 포인트 (구현: 패킷 heal-1-01) */
-export type POINTS_PER_CHECKIN = number;
-
-/** 하루 최대 획득 포인트 (구현: 패킷 heal-1-01) */
-export type MAX_DAILY_POINTS = number;
+/** 획득 배지 계산 순수 함수 (구현: 패킷 heal-2-01) */
+export type earnedBadgesFn = (stats: UserStats) => Badge[];
 
 /** 정책 위반 항목 검사 (구현: 패킷 heal-1-03) */
 export type getPolicyViolationsFn = (content: string) => { type: 'gambling' | 'financial-transfer' | 'competitive-money'; message: string }[];

@@ -13,57 +13,43 @@
  * 타입을 그대로 가정해도 된다. 추측이 어긋나 병합에서 무너지는 것을 막기 위한 파일이다.
  */
 
-export type User = { id: string; name: string; points: number; level: number; completedChallenges: number; createdAt: string };
+/** 사용자 프로필 (금전 제거됨) (구현: 패킷 heal-1-01) */
+export type User = { id: string; email: string; pointBalance: number; totalPointsEarned: number };
 
-export type Challenge = { id: string; title: string; description: string; category: string; difficulty: 'easy' | 'medium' | 'hard'; durationDays: number; pointsReward: number };
+/** 습관 추적 엔티티 (구현: 패킷 heal-1-01) */
+export type Habit = { id: string; userId: string; name: string; category: string; targetDays: number; completedDays: number; currentStreak: number; createdAt: string };
 
-export type ChallengeResult = { id: string; challengeId: string; userId: string; completedAt: string; pointsEarned: number };
+/** 목표 엔티티 (구현: 패킷 heal-1-01) */
+export type Goal = { id: string; userId: string; title: string; habitIds: string[]; status: 'active' | 'completed' | 'paused'; progress: number; createdAt: string };
 
-export type LeaderboardEntry = { userId: string; userName: string; points: number; level: number };
+/** 배지/업적 엔티티 (구현: 패킷 heal-1-01) */
+export type Badge = { id: string; name: string; description: string; icon: string; pointsRequired: number };
 
-export type useAppStoreFn = () => { user: User | null; challenges: Challenge[]; results: ChallengeResult[]; loading: boolean; error: string | null; completeChallenge: (challengeId: string) => Promise<void>; loadChallenges: () => Promise<void>; setUser: (user: User) => void };
+/** 습관 체크인 기록 (구현: 패킷 heal-1-01) */
+export type HabitCheckIn = { id: string; habitId: string; date: string; completed: boolean };
 
-export type getChallengesFn = () => Promise<Challenge[]>;
+/** 스토어 상태 + 액션 (구현: 패킷 heal-1-01) */
+export type AppState = { user: User; habits: Habit[]; goals: Goal[]; badges: Badge[]; checkHabit: (habitId: string, date: string) => Promise<HabitCheckIn>; saveGoal: (goal: Goal) => Promise<Goal>; addPoints: (userId: string, amount: number) => Promise<void>; awardBadge: (userId: string, badgeId: string) => Promise<void> };
 
-export type submitChallengeResultFn = (challengeId: string) => Promise<ChallengeResult>;
+/** Zustand 스토어 훅 (구현: 패킷 heal-1-01) */
+export type useAppStoreFn = () => AppState;
 
-export type getLeaderboardFn = () => Promise<LeaderboardEntry[]>;
+/** 포인트 포맷팅 (UI 표시용) (구현: 패킷 heal-1-01) */
+export type formatPointsFn = (points: number) => string;
 
-export type validatePolicyComplianceFn = (text: string) => { valid: boolean; violations?: string[] };
+/** 진행률 계산 (0-100) (구현: 패킷 heal-1-01) */
+export type calculateProgressFn = (completed: number, target: number) => number;
+
+/** 연속 기록 계산 (구현: 패킷 heal-1-01) */
+export type getStreakFn = (habit: Habit) => number;
+
+/** 습관 체크인당 포인트 (구현: 패킷 heal-1-01) */
+export type POINTS_PER_CHECKIN = number;
+
+/** 하루 최대 획득 포인트 (구현: 패킷 heal-1-01) */
+export type MAX_DAILY_POINTS = number;
+
+/** 정책 위반 항목 검사 (구현: 패킷 heal-1-03) */
+export type getPolicyViolationsFn = (content: string) => { type: 'gambling' | 'financial-transfer' | 'competitive-money'; message: string }[];
 
 ```
-
-## Existing Codebase (import and use these — do NOT recreate)
-### File Tree (src/)
-  components/
-    Card.tsx
-    PageShell.tsx
-    ScreenScaffold.tsx
-    StateView.tsx
-  constants/
-    index.ts
-  lib/
-    api.ts
-    contract.ts
-    rewards.ts
-  pages/
-    Challenge.tsx
-    Home.tsx
-    Ranking.tsx
-    Result.tsx
-  store/
-    useAppStore.ts
-  types/
-    index.ts
-
-### Exports (src/lib/)
-- api.ts: export async function getChallenges(): Promise<Challenge[]>; export async function submitChallengeResult(challengeId: string): Promise<ChallengeResult>; export async function getLeaderboard(): Promise<LeaderboardEntry[]>
-- contract.ts: export type User =; export type Challenge =; export type ChallengeResult =; export type LeaderboardEntry =; export type useAppStoreFn = () =>; export type getChallengesFn = () => Promise<Challenge[]>; export type submitChallengeResultFn = (challengeId: string) => Promise<ChallengeResult>; export type getLeaderboardFn = () => Promise<LeaderboardEntry[]>
-- rewards.ts: export function calculateXpEarned(challenge: Challenge): number; export function calculateLevel(totalXp: number): number; export function updateStreak(streak: Streak, completedAt: string): Streak; export function calculateGoalAchievementRate(completedCount: number, goalCount: number): number; export function isPersonalBest(pastResults: ChallengeResult[], candidate: ChallengeResult): boolean; export function checkEarnedBadges(streak: Streak, totalCompleted: number): Badge[]
-
-### Components (src/components/)
-- Card.tsx: Card
-- PageShell.tsx: PageShell
-- ScreenScaffold.tsx: ScreenScaffold
-- StateView.tsx: EmptyState
-CRITICAL: Before creating any new function, type, or component, check the list above. If something similar exists, import and use it.

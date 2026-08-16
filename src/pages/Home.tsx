@@ -3,27 +3,15 @@ import { useNavigate } from "react-router-dom";
 import { Top, Paragraph, Button } from "@toss/tds-mobile";
 import ScreenScaffold from "../components/ScreenScaffold";
 import Card from "../components/Card";
-
-const GOAL_STORAGE_KEY = "reading_daily_goal";
-
-function loadStoredGoal(): string {
-  try {
-    return localStorage.getItem(GOAL_STORAGE_KEY) ?? "";
-  } catch {
-    return "";
-  }
-}
+import { useAppStore } from "../store/useAppStore";
 
 export default function Home() {
   const navigate = useNavigate();
-  const [goal, setGoal] = useState(loadStoredGoal);
+  const { goals, setGoal } = useAppStore();
+  const [pages, setPages] = useState(() => (goals[0] ? String(goals[0].dailyTargetPages) : ""));
 
   function handleSubmit() {
-    try {
-      localStorage.setItem(GOAL_STORAGE_KEY, goal);
-    } catch {
-      // localStorage 접근 불가 시 조용히 무시 (프라이버시 모드 등)
-    }
+    setGoal({ id: "daily-reading", title: "매일 읽기", dailyTargetPages: Number(pages) || 0 });
     navigate("/challenge");
   }
 
@@ -35,13 +23,13 @@ export default function Home() {
       <Card>
         <div data-testid="goal-form" style={{ display: "flex", flexDirection: "column", gap: 16 }}>
           <Paragraph.Text typography="st9" color="grey700" fontWeight="medium">
-            하루 목표
+            하루 목표 쪽수
           </Paragraph.Text>
           <input
             data-testid="goal-input"
-            placeholder="예: 20쪽"
-            value={goal}
-            onChange={(event: ChangeEvent<HTMLInputElement>) => setGoal(event.target.value)}
+            placeholder="예: 20"
+            value={pages}
+            onChange={(event: ChangeEvent<HTMLInputElement>) => setPages(event.target.value)}
             style={{
               height: 52,
               padding: "0 16px",

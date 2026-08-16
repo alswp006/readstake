@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, beforeEach } from "vitest";
+import { describe, it, expect } from "vitest";
 import { execSync } from "child_process";
 import * as fs from "fs";
 import * as path from "path";
@@ -74,7 +74,6 @@ describe("패킷 heal-2-01: 금전 도메인 원자적 제거", () => {
       }
     });
 
-    const message = violations.length > 0 ? violations.map((v) => `${v.keyword} in ${v.files.join(", ")}`).join("; ") : "";
     expect(violations).toEqual([]);
   });
 
@@ -170,7 +169,7 @@ describe("패킷 heal-2-01: 금전 도메인 원자적 제거", () => {
 
   it("AC-3[P0]: npx tsc --noEmit 오류 0건", () => {
     try {
-      const output = execSync("npx tsc --noEmit", {
+      execSync("npx tsc --noEmit", {
         cwd: projectRoot,
         encoding: "utf-8",
         stdio: ["pipe", "pipe", "pipe"],
@@ -186,7 +185,7 @@ describe("패킷 heal-2-01: 금전 도메인 원자적 제거", () => {
       // TS 에러만 추출 (warning 제외)
       const tsErrors = combinedOutput
         .split("\n")
-        .filter((line) => line.includes("error TS"));
+        .filter((line: string) => line.includes("error TS"));
 
       expect(tsErrors, `TypeScript 컴파일 에러:\n${combinedOutput}`).toEqual([]);
     }
@@ -481,9 +480,6 @@ describe("패킷 heal-2-01: 금전 도메인 원자적 제거", () => {
     }
 
     const contractContent = fs.readFileSync(contractPath, "utf-8");
-    const typesContent = fs.readFileSync(typesPath, "utf-8");
-    const storeContent = fs.readFileSync(storePath, "utf-8");
-    const rewardsContent = fs.readFileSync(rewardsPath, "utf-8");
 
     // contract.ts에서 선언한 User 타입을 types.ts가 import하거나 맞춰서 정의했는지 확인
     // User 타입이 금전 필드(balance, cashReward, deposit 등)를 포함하지 않는지 확인
@@ -502,10 +498,7 @@ describe("패킷 heal-2-01: 금전 도메인 원자적 제거", () => {
       ];
 
       forbiddenUserFields.forEach((field) => {
-        expect(userTypeInContract[0]).not.toContain(
-          field,
-          `contract.ts의 User 타입에 금전 필드 ${field}가 있음`
-        );
+        expect(userTypeInContract[0]).not.toContain(field);
       });
     }
   });
@@ -576,10 +569,7 @@ describe("패킷 heal-2-01: 금전 도메인 원자적 제거", () => {
       .filter((f) => f.endsWith(".test.ts") || f.endsWith(".test.tsx"));
 
     // 적어도 하나의 테스트 파일이 있어야 함
-    expect(testFiles.length).toBeGreaterThan(
-      0,
-      "__tests__ 디렉토리에 테스트 파일이 없음"
-    );
+    expect(testFiles.length).toBeGreaterThan(0);
 
     // 금전 로직 테스트 파일이 없는지 확인 (구 파일 제거됨)
     const oldFinanceTestFiles = testFiles.filter(
@@ -590,9 +580,6 @@ describe("패킷 heal-2-01: 금전 도메인 원자적 제거", () => {
         f.includes("settlement")
     );
 
-    expect(oldFinanceTestFiles).toEqual(
-      [],
-      `구 금전 로직 테스트 파일이 남아있음: ${oldFinanceTestFiles.join(", ")}`
-    );
+    expect(oldFinanceTestFiles).toEqual([]);
   });
 });

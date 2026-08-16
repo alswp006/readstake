@@ -1,61 +1,52 @@
-import type { Challenge, ChallengeResult } from "./contract";
-import type { Badge, Streak } from "../types";
-import {
-  XP_BY_DIFFICULTY,
-  LEVEL_XP_STEP,
-  STREAK_BADGE_THRESHOLD,
-  COMPLETION_BADGE_THRESHOLD,
-} from "../constants";
+import type { DailyLog, Goal, Progress, Streak, Badge, UserStats } from "../types";
+import { BADGE_DEFS } from "../constants";
 
-export function calculateXpEarned(challenge: Challenge): number {
-  return challenge.pointsReward > 0 ? challenge.pointsReward : XP_BY_DIFFICULTY[challenge.difficulty];
+export function calcProgress(logs: DailyLog[], goal: Goal): Progress {
+  const totalDays = logs.length;
+  if (totalDays === 0) return { percent: 0, totalDays: 0 };
+  const completedDays = logs.filter((log) => log.pagesRead >= goal.dailyTargetPages).length;
+  return { percent: Math.round((completedDays / totalDays) * 100), totalDays };
 }
 
-export function calculateLevel(totalXp: number): number {
-  return Math.max(1, Math.floor(totalXp / LEVEL_XP_STEP) + 1);
-}
-
-export function updateStreak(streak: Streak, completedAt: string): Streak {
+export function calcStreak(logs: DailyLog[], today: string): Streak {
   const oneDayMs = 24 * 60 * 60 * 1000;
-  const isConsecutiveDay =
-    streak.lastCompletedAt !== null &&
-    Math.round((new Date(completedAt).getTime() - new Date(streak.lastCompletedAt).getTime()) / oneDayMs) === 1;
-  const currentStreak = isConsecutiveDay ? streak.currentStreak + 1 : 1;
-  return {
-    currentStreak,
-    longestStreak: Math.max(streak.longestStreak, currentStreak),
-    lastCompletedAt: completedAt,
-  };
+  const completedDates = logs
+    .filter((log) => log.completed)
+    .map((log) => log.date)
+    .sort();
+
+  let current = 0;
+  let best = 0;
+  let lastCheckedDate: string | null = null;
+
+  completedDates.forEach((date) => {
+    const isConsecutiveDay =
+      lastCheckedDate !== null &&
+      Math.round((new Date(date).getTime() - new Date(lastCheckedDate).getTime()) / oneDayMs) === 1;
+    current = isConsecutiveDay ? current + 1 : 1;
+    best = Math.max(best, current);
+    lastCheckedDate = date;
+  });
+
+  const missedSinceToday =
+    lastCheckedDate !== null &&
+    Math.round((new Date(today).getTime() - new Date(lastCheckedDate).getTime()) / oneDayMs) > 1;
+
+  return { current: missedSinceToday ? 0 : current, best, lastCheckedDate };
 }
 
-export function calculateGoalAchievementRate(completedCount: number, goalCount: number): number {
-  if (goalCount <= 0) return 0;
-  return Math.min(1, completedCount / goalCount);
-}
-
-export function isPersonalBest(pastResults: ChallengeResult[], candidate: ChallengeResult): boolean {
-  const previousBest = pastResults.reduce((best, result) => Math.max(best, result.pointsEarned), 0);
-  return candidate.pointsEarned > previousBest;
-}
-
-export function checkEarnedBadges(streak: Streak, totalCompleted: number): Badge[] {
-  const earnedAt = new Date().toISOString();
-  const badges: Badge[] = [];
-  if (streak.currentStreak >= STREAK_BADGE_THRESHOLD) {
-    badges.push({
-      id: "streak-week",
-      name: "일주일 연속 완독",
-      description: `${STREAK_BADGE_THRESHOLD}일 연속으로 챌린지를 완료했어요`,
-      earnedAt,
-    });
-  }
-  if (totalCompleted >= COMPLETION_BADGE_THRESHOLD) {
-    badges.push({
-      id: "completed-milestone",
-      name: "완독 마스터",
-      description: `챌린지를 ${COMPLETION_BADGE_THRESHOLD}회 완료했어요`,
-      earnedAt,
-    });
-  }
-  return badges;
+export function earnedBadges(stats: UserStats): Badge[] {
+  const achievedAt = stats.streak.lastCheckedDate ?? "";
+  return BADGE_DEFS.filter((def) =>
+    def.streakThreshold !== undefined
+      ? stats.streak.best >= def.streakThreshold
+      : def.xpThreshold !== undefined
+        ? stats.xp >= def.xpThreshold
+        : false
+  ).map((def) => ({
+    id: def.id,
+    name: def.name,
+    description: def.description,
+    achievedAt,
+  }));
 }

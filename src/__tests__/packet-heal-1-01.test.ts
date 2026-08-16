@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeEach, vi } from "vitest";
+import { describe, it, expect } from "vitest";
 import { execSync } from "child_process";
 import fs from "fs";
 import path from "path";
@@ -176,17 +176,17 @@ describe("금전 예치·상금풀·정산 도메인 전면 제거 및 비금전
   // AC-3: 보상은 비금전 값으로만 (progress/streak/badge/xp)
   // ============================================================================
 
-  it("AC-3[P0]: User type should only have non-financial reward fields (xp, level, badge, progress, streak)", () => {
+  it("AC-3[P0]: UserStats type should only have non-financial reward fields (xp, level, badge, progress, streak)", () => {
     const contractPath = path.join(srcDir, "lib", "contract.ts");
     expect(fs.existsSync(contractPath)).toBe(true);
 
     const contractContent = fs.readFileSync(contractPath, "utf-8");
 
-    // Should define User with non-financial fields
-    expect(contractContent).toMatch(/type User\s*=/);
+    // Should define UserStats with non-financial fields
+    expect(contractContent).toMatch(/type UserStats\s*=/);
 
     // Should NOT have balance, cashReward, deposit, stake
-    const forbiddenInUser = [
+    const forbiddenInUserStats = [
       "balance",
       "cashReward",
       "cash_reward",
@@ -194,13 +194,13 @@ describe("금전 예치·상금풀·정산 도메인 전면 제거 및 비금전
       "stake",
     ];
 
-    forbiddenInUser.forEach((field) => {
-      expect(contractContent).not.toMatch(new RegExp(`User[^}]*${field}`));
+    forbiddenInUserStats.forEach((field) => {
+      expect(contractContent).not.toMatch(new RegExp(`UserStats[^}]*${field}`));
     });
 
-    // Should have xp, level, progress, streak, badge
-    const requiredInUser = ["level", "completedChallenges"];
-    requiredInUser.forEach((field) => {
+    // Should have xp, level, streak
+    const requiredInUserStats = ["level", "streak"];
+    requiredInUserStats.forEach((field) => {
       expect(contractContent).toMatch(new RegExp(`\\b${field}\\b`));
     });
   });
@@ -227,25 +227,25 @@ describe("금전 예치·상금풀·정산 도메인 전면 제거 및 비금전
     }
   });
 
-  it("AC-3[P1]: Challenge rewards should only give xp/points, never cash", () => {
+  it("AC-3[P1]: Goal should track reading targets via non-financial fields, never cash", () => {
     const contractPath = path.join(srcDir, "lib", "contract.ts");
     const contractContent = fs.readFileSync(contractPath, "utf-8");
 
-    // Challenge type should have pointsReward (non-financial xp)
-    expect(contractContent).toMatch(/pointsReward/);
+    // Goal type should have dailyTargetPages (non-financial target)
+    expect(contractContent).toMatch(/dailyTargetPages/);
 
-    // Should NOT have cashReward or currency fields in Challenge
+    // Should NOT have cashReward or currency fields in Goal
     expect(contractContent).not.toMatch(
-      /type Challenge[^}]*(cashReward|currencyReward)/
+      /type Goal[^}]*(cashReward|currencyReward)/
     );
   });
 
-  it("AC-3[P1]: ChallengeResult should record pointsEarned only, no monetary settlement", () => {
+  it("AC-3[P1]: DailyLog should record pagesRead only, no monetary settlement", () => {
     const contractPath = path.join(srcDir, "lib", "contract.ts");
     const contractContent = fs.readFileSync(contractPath, "utf-8");
 
-    // ChallengeResult should have pointsEarned
-    expect(contractContent).toMatch(/pointsEarned/);
+    // DailyLog should have pagesRead
+    expect(contractContent).toMatch(/pagesRead/);
 
     // Should NOT have settlement, payout, refund, or balance fields
     const forbiddenFields = [
@@ -257,7 +257,7 @@ describe("금전 예치·상금풀·정산 도메인 전면 제거 및 비금전
     ];
     forbiddenFields.forEach((field) => {
       expect(contractContent).not.toMatch(
-        new RegExp(`ChallengeResult[^}]*${field}`)
+        new RegExp(`DailyLog[^}]*${field}`)
       );
     });
   });
@@ -268,7 +268,7 @@ describe("금전 예치·상금풀·정산 도메인 전면 제거 및 비금전
 
   it("AC-4[P0]: TypeScript should compile without errors (npx tsc --noEmit)", () => {
     try {
-      const result = execSync("npx tsc --noEmit", {
+      execSync("npx tsc --noEmit", {
         cwd: projectRoot,
         encoding: "utf-8",
         stdio: ["pipe", "pipe", "pipe"],
@@ -283,7 +283,7 @@ describe("금전 예치·상금풀·정산 도메인 전면 제거 및 비금전
 
   it("AC-4[P0]: Build should succeed (npx vite build) with zero errors", () => {
     try {
-      const result = execSync("npx vite build", {
+      execSync("npx vite build", {
         cwd: projectRoot,
         encoding: "utf-8",
         stdio: ["pipe", "pipe", "pipe"],

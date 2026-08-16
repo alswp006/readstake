@@ -4,23 +4,12 @@ import ScreenScaffold from "../components/ScreenScaffold";
 import Card from "../components/Card";
 import { EmptyState } from "../components/StateView";
 import { useAppStore } from "../store/useAppStore";
-import { updateStreak } from "../lib/rewards";
-import type { Streak } from "../types";
-
-function computeStreak(completedAtList: string[]): Streak {
-  const sorted = [...completedAtList].sort((a, b) => new Date(a).getTime() - new Date(b).getTime());
-  let streak: Streak = { currentStreak: 0, longestStreak: 0, lastCompletedAt: null };
-  sorted.forEach((completedAt) => {
-    streak = updateStreak(streak, completedAt);
-  });
-  return streak;
-}
 
 export default function Result() {
   const navigate = useNavigate();
-  const { user, results } = useAppStore();
+  const { logs, stats } = useAppStore();
 
-  if (!user || results.length === 0) {
+  if (logs.length === 0) {
     return (
       <ScreenScaffold top={<Top title={<Top.TitleParagraph>기록</Top.TitleParagraph>} />}>
         <EmptyState
@@ -36,8 +25,7 @@ export default function Result() {
     );
   }
 
-  const streak = computeStreak(results.map((result) => result.completedAt));
-  const totalCompleted = user.completedChallenges;
+  const totalCompleted = logs.filter((log) => log.completed).length;
 
   return (
     <ScreenScaffold top={<Top title={<Top.TitleParagraph>기록</Top.TitleParagraph>} />}>
@@ -46,7 +34,7 @@ export default function Result() {
           완독 {totalCompleted}회
         </Paragraph.Text>
         <Paragraph.Text typography="t6" color="grey600">
-          연속 {streak.currentStreak}일째 기록 중이에요
+          연속 {stats.streak.current}일째 기록 중이에요
         </Paragraph.Text>
       </Card>
       <Button display="block" data-testid="view-badges-button" onClick={() => navigate("/ranking")}>

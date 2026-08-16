@@ -1,25 +1,34 @@
-export type { User, Challenge, ChallengeResult, LeaderboardEntry } from "../lib/contract";
+export type Goal = {
+  id: string;
+  title: string;
+  dailyTargetPages: number;
+};
+
+export type DailyLog = {
+  date: string;
+  pagesRead: number;
+  completed: boolean;
+};
+
+export type Progress = {
+  percent: number;
+  totalDays: number;
+};
+
+export type Streak = {
+  current: number;
+  best: number;
+  lastCheckedDate: string | null;
+};
 
 export type Badge = {
   id: string;
   name: string;
   description: string;
-  earnedAt: string;
+  achievedAt: string;
 };
 
-export type Streak = {
-  currentStreak: number;
-  longestStreak: number;
-  lastCompletedAt: string | null;
-};
-
-export type Progress = {
-  challengeId: string;
-  percentComplete: number;
-  updatedAt: string;
-};
-
-export type UserRewardSummary = {
+export type UserStats = {
   xp: number;
   level: number;
   streak: Streak;

@@ -16,6 +16,19 @@ import { MemoryRouter } from "react-router-dom";
 
 // ---- @toss/tds-mobile mock: jsdom에서 크래시하므로 어떤 named/nested export든 통과시키는 Proxy로 대체 ----
 vi.mock("@toss/tds-mobile", () => {
+  // React/Node의 내부 인터롭 검사(then/prototype/propTypes 등)까지 컴포넌트로 되돌리면
+  // 모듈이 thenable로 오인되어 await import()가 영원히 멈추거나, class 컴포넌트로 오인돼 크래시한다.
+  const SPECIAL_KEYS = new Set([
+    "then",
+    "prototype",
+    "propTypes",
+    "defaultProps",
+    "contextTypes",
+    "childContextTypes",
+    "getDerivedStateFromProps",
+    "contextType",
+    "$$typeof",
+  ]);
   const makeComponent = (name: string): any => {
     const Component = ({ children, ...props }: any) =>
       React.createElement("div", { "data-tds": name, ...props }, children);
@@ -23,6 +36,7 @@ vi.mock("@toss/tds-mobile", () => {
     return new Proxy(Component, {
       get: (target: any, prop: string) => {
         if (prop in target) return target[prop];
+        if (typeof prop === "symbol" || SPECIAL_KEYS.has(prop)) return undefined;
         return makeComponent(`${name}.${String(prop)}`);
       },
     });
@@ -32,8 +46,10 @@ vi.mock("@toss/tds-mobile", () => {
     {
       get: (_target, prop) => {
         if (prop === "__esModule") return true;
+        if (typeof prop === "symbol" || SPECIAL_KEYS.has(prop as string)) return undefined;
         return makeComponent(String(prop));
       },
+      has: () => true,
     }
   );
 });

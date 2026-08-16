@@ -20,6 +20,19 @@ import Ranking from "../pages/Ranking";
 
 // ---- @toss/tds-mobile mock: jsdom에서 크래시하므로 어떤 named/nested export든 통과시키는 Proxy로 대체 ----
 vi.mock("@toss/tds-mobile", () => {
+  // React/Node의 내부 인터롭 검사(then/prototype/propTypes 등)까지 컴포넌트로 되돌리면
+  // 모듈이 thenable로 오인되어 await import()가 영원히 멈추거나, class 컴포넌트로 오인돼 크래시한다.
+  const SPECIAL_KEYS = new Set([
+    "then",
+    "prototype",
+    "propTypes",
+    "defaultProps",
+    "contextTypes",
+    "childContextTypes",
+    "getDerivedStateFromProps",
+    "contextType",
+    "$$typeof",
+  ]);
   const makeComponent = (name: string): any => {
     const Component = ({ children, ...props }: any) =>
       React.createElement("div", { "data-tds": name, ...props }, children);
@@ -27,6 +40,7 @@ vi.mock("@toss/tds-mobile", () => {
     return new Proxy(Component, {
       get: (target: any, prop: string) => {
         if (prop in target) return target[prop];
+        if (typeof prop === "symbol" || SPECIAL_KEYS.has(prop)) return undefined;
         return makeComponent(`${name}.${String(prop)}`);
       },
     });
@@ -36,8 +50,10 @@ vi.mock("@toss/tds-mobile", () => {
     {
       get: (_target, prop) => {
         if (prop === "__esModule") return true;
+        if (typeof prop === "symbol" || SPECIAL_KEYS.has(prop as string)) return undefined;
         return makeComponent(String(prop));
       },
+      has: () => true,
     }
   );
 });
@@ -50,38 +66,28 @@ vi.mock("react-router-dom", async () => ({
 }));
 
 // ---- 앱 전역 store mock (src/store/useAppStore.ts 계약을 그대로 흉내) ----
-const mockCompleteChallenge = vi.fn().mockResolvedValue(undefined);
-const mockLoadChallenges = vi.fn().mockResolvedValue(undefined);
-const mockSetUser = vi.fn();
+const mockSetGoal = vi.fn().mockResolvedValue(undefined);
+const mockCheckToday = vi.fn().mockResolvedValue({ date: "2026-08-16", pagesRead: 20, completed: true });
+const mockLoadGoals = vi.fn().mockResolvedValue(undefined);
+const mockResetStreakIfMissed = vi.fn();
+const mockGrantBadge = vi.fn();
 
-const sampleChallenge = {
-  id: "c1",
-  title: "독서 습관 21일",
-  description: "매일 20쪽씩 21일 동안 읽기",
-  category: "habit",
-  difficulty: "easy" as const,
-  durationDays: 21,
-  pointsReward: 210,
-};
+const sampleGoal = { id: "daily-reading", title: "매일 읽기", dailyTargetPages: 20 };
 
-const sampleResult = {
-  id: "result_c1_1",
-  challengeId: "c1",
-  userId: "me",
-  completedAt: "2026-08-16T09:00:00.000Z",
-  pointsEarned: 210,
-};
+const sampleLog = { date: "2026-08-16", pagesRead: 20, completed: true };
 
 function buildStoreState(overrides: Record<string, unknown> = {}) {
   return {
-    user: { id: "me", name: "나", points: 210, level: 3, completedChallenges: 1, createdAt: "2026-08-01T00:00:00.000Z" },
-    challenges: [sampleChallenge],
-    results: [sampleResult],
+    goals: [sampleGoal],
+    logs: [sampleLog],
+    stats: { xp: 10, level: 1, streak: { current: 1, best: 1, lastCheckedDate: "2026-08-16" }, badges: [] },
     loading: false,
     error: null,
-    completeChallenge: mockCompleteChallenge,
-    loadChallenges: mockLoadChallenges,
-    setUser: mockSetUser,
+    setGoal: mockSetGoal,
+    checkToday: mockCheckToday,
+    loadGoals: mockLoadGoals,
+    resetStreakIfMissed: mockResetStreakIfMissed,
+    grantBadge: mockGrantBadge,
     ...overrides,
   };
 }
@@ -94,9 +100,11 @@ vi.mock("../store/useAppStore", () => ({
 
 beforeEach(() => {
   mockNavigate.mockClear();
-  mockCompleteChallenge.mockClear();
-  mockLoadChallenges.mockClear();
-  mockSetUser.mockClear();
+  mockSetGoal.mockClear();
+  mockCheckToday.mockClear();
+  mockLoadGoals.mockClear();
+  mockResetStreakIfMissed.mockClear();
+  mockGrantBadge.mockClear();
   mockStoreState = buildStoreState();
 });
 
@@ -211,7 +219,7 @@ describe("화면·문구에서 금전/경쟁적 금전이전 UX 제거, 습관 �
     const checkButton = screen.getByTestId("today-check-button");
     fireEvent.click(checkButton);
 
-    await waitFor(() => expect(mockCompleteChallenge).toHaveBeenCalledWith("c1"));
+    await waitFor(() => expect(mockCheckToday).toHaveBeenCalledWith(20));
     await waitFor(() => expect(mockNavigate).toHaveBeenCalledWith("/result"));
   });
 
@@ -256,7 +264,11 @@ describe("화면·문구에서 금전/경쟁적 금전이전 UX 제거, 습관 �
   });
 
   it("AC-4[P0]: Challenge and Result render a crash-free empty state when there is no goal/history yet (edge case)", () => {
-    mockStoreState = buildStoreState({ challenges: [], results: [], user: null });
+    mockStoreState = buildStoreState({
+      goals: [],
+      logs: [],
+      stats: { xp: 0, level: 1, streak: { current: 0, best: 0, lastCheckedDate: null }, badges: [] },
+    });
 
     render(React.createElement(MemoryRouter, null, React.createElement(Challenge)));
     expect(screen.getAllByTestId("empty-state").length).toBeGreaterThanOrEqual(1);
