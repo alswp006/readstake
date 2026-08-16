@@ -118,7 +118,7 @@ function main() {
     process.exit(1);
   }
 
-  console.log(`정책 자가검증 통과 (검사 파일 ${files.length}개)`);
+  console.log(`policy-check: OK`);
   process.exit(0);
 }
 
