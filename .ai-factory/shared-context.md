@@ -61,9 +61,11 @@ export type getPolicyViolationsFn = (content: string) => { type: 'gambling' | 'f
 
 ## Existing Codebase (import and use these — do NOT recreate)
 ### File Tree (src/)
+  App.tsx
   components/
     Card.tsx
     PageShell.tsx
+    ProgressBar.tsx
     ScreenScaffold.tsx
     StateView.tsx
   constants/
@@ -74,11 +76,14 @@ export type getPolicyViolationsFn = (content: string) => { type: 'gambling' | 'f
     rewards.ts
   main.tsx
   pages/
+    Badges.tsx
     Challenge.tsx
+    Goal.tsx
     Home.tsx
     Ranking.tsx
     Result.tsx
     Settings.tsx
+    Stats.tsx
   store/
     useAppStore.ts
   types/
@@ -92,10 +97,12 @@ export type getPolicyViolationsFn = (content: string) => { type: 'gambling' | 'f
 ### Components (src/components/)
 - Card.tsx: Card
 - PageShell.tsx: PageShell
+- ProgressBar.tsx: ProgressBar
 - ScreenScaffold.tsx: ScreenScaffold
-- StateView.tsx: EmptyState
+- StateView.tsx: EmptyState, LoadingState
 CRITICAL: Before creating any new function, type, or component, check the list above. If something similar exists, import and use it.
 
 ## Already Implemented (do NOT duplicate or overwrite)
 - heal-2-01: 금전 도메인 원자적 제거: 타입·스토어·lib·모든 참조·테스트를 한 패킷에서 동시에 GREEN화 (files: src/types/index.ts, src/store/useAppStore.ts, src/lib/rewards.ts, src/lib/api.ts, src/constants/index.ts, src/__tests__/rewards.test.ts)
 - heal-2-03: 정책 셀프체크 스크립트 추가(순수 정적 검사, 실행 범위 최소화) (files: scripts/policy-check.mjs, package.json, src/pages/Settings.tsx)
+- heal-2-02: 습관 트래커 화면 재구성: 금전 UI 제거 후 목표→체크→진행률→배지 흐름 완성 (files: src/pages/Home.tsx, src/pages/Goal.tsx, src/pages/Stats.tsx, src/pages/Badges.tsx, src/App.tsx, src/components)
