@@ -45,7 +45,7 @@ describe("금전 예치·상금풀·정산 도메인 전면 제거 및 비금전
     financialKeywords.forEach((keyword) => {
       try {
         const result = execSync(
-          `grep -r "${keyword}" ${srcDir} --include="*.ts" --include="*.tsx" --include="*.js" --include="*.jsx" 2>/dev/null`,
+          `grep -r "${keyword}" ${srcDir} --include="*.ts" --include="*.tsx" --include="*.js" --include="*.jsx" --exclude-dir=__tests__ 2>/dev/null`,
           { encoding: "utf-8" }
         );
         if (result.trim()) {
@@ -80,7 +80,7 @@ describe("금전 예치·상금풀·정산 도메인 전면 제거 및 비금전
     moneyPatterns.forEach((pattern) => {
       try {
         const result = execSync(
-          `grep -rE "${pattern}" ${srcDir} --include="*.ts" --include="*.tsx" --include="*.js" --include="*.jsx" 2>/dev/null`,
+          `grep -rE "${pattern}" ${srcDir} --include="*.ts" --include="*.tsx" --include="*.js" --include="*.jsx" --exclude-dir=__tests__ 2>/dev/null`,
           { encoding: "utf-8" }
         );
         if (result.trim()) {
@@ -124,7 +124,7 @@ describe("금전 예치·상금풀·정산 도메인 전면 제거 및 비금전
     transferPatterns.forEach((pattern) => {
       try {
         const result = execSync(
-          `grep -r "${pattern}" ${srcDir} --include="*.ts" --include="*.tsx" 2>/dev/null`,
+          `grep -r "${pattern}" ${srcDir} --include="*.ts" --include="*.tsx" --exclude-dir=__tests__ 2>/dev/null`,
           { encoding: "utf-8" }
         );
         if (result.trim()) {

@@ -35,12 +35,22 @@ export type validatePolicyComplianceFn = (text: string) => { valid: boolean; vio
 
 ## Existing Codebase (import and use these — do NOT recreate)
 ### File Tree (src/)
+  components/
+    Card.tsx
+    PageShell.tsx
+    ScreenScaffold.tsx
+    StateView.tsx
   constants/
     index.ts
   lib/
     api.ts
     contract.ts
     rewards.ts
+  pages/
+    Challenge.tsx
+    Home.tsx
+    Ranking.tsx
+    Result.tsx
   store/
     useAppStore.ts
   types/
@@ -50,4 +60,10 @@ export type validatePolicyComplianceFn = (text: string) => { valid: boolean; vio
 - api.ts: export async function getChallenges(): Promise<Challenge[]>; export async function submitChallengeResult(challengeId: string): Promise<ChallengeResult>; export async function getLeaderboard(): Promise<LeaderboardEntry[]>
 - contract.ts: export type User =; export type Challenge =; export type ChallengeResult =; export type LeaderboardEntry =; export type useAppStoreFn = () =>; export type getChallengesFn = () => Promise<Challenge[]>; export type submitChallengeResultFn = (challengeId: string) => Promise<ChallengeResult>; export type getLeaderboardFn = () => Promise<LeaderboardEntry[]>
 - rewards.ts: export function calculateXpEarned(challenge: Challenge): number; export function calculateLevel(totalXp: number): number; export function updateStreak(streak: Streak, completedAt: string): Streak; export function calculateGoalAchievementRate(completedCount: number, goalCount: number): number; export function isPersonalBest(pastResults: ChallengeResult[], candidate: ChallengeResult): boolean; export function checkEarnedBadges(streak: Streak, totalCompleted: number): Badge[]
+
+### Components (src/components/)
+- Card.tsx: Card
+- PageShell.tsx: PageShell
+- ScreenScaffold.tsx: ScreenScaffold
+- StateView.tsx: EmptyState
 CRITICAL: Before creating any new function, type, or component, check the list above. If something similar exists, import and use it.
