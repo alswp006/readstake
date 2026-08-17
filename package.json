@@ -7,7 +7,8 @@
     "test:ui": "vitest --ui",
     "typecheck": "tsc --noEmit",
     "policy-check": "node scripts/policy-check.mjs src",
-    "prebuild": "npm run policy-check",
+    "verify-compliance": "node scripts/verify-compliance.mjs .",
+    "prebuild": "npm run policy-check && npm run verify-compliance",
     "build": "tsc --noEmit && vite build"
   },
   "dependencies": {

@@ -3,6 +3,7 @@
 // 결제 SDK 사용이 재도입되지 않았는지 빌드 시점에 스캔한다.
 import fs from "fs";
 import path from "path";
+import { fileURLToPath } from "url";
 
 const FORBIDDEN_KEYWORDS = [
   "사행성",
@@ -97,17 +98,16 @@ function findKeywordViolations(content) {
   return violations;
 }
 
-function main() {
-  const targetDir = path.resolve(process.argv[2] ?? "src");
-
+// 디렉터리 하나를 훑어 { report, scannedCount }를 돌려준다.
+// verify-compliance.mjs가 같은 규칙을 재사용하도록 분리해 뒀다 — 키워드 목록이 두 벌이 되면
+// 한쪽만 갱신되어 가드가 조용히 헐거워진다.
+export function scanDirectory(targetDir) {
   if (!fs.existsSync(targetDir)) {
-    console.log(`policy-check: 대상 경로가 없어 건너뜁니다 (${targetDir})`);
-    process.exit(0);
+    return { report: [], scannedCount: 0, skipped: true };
   }
 
   const allowlist = loadAllowlist(targetDir);
   const files = listFiles(targetDir);
-
   const report = [];
 
   for (const filePath of files) {
@@ -120,6 +120,21 @@ function main() {
     if (violations.length > 0) {
       report.push({ file: relPath, violations });
     }
+  }
+
+  return { report, scannedCount: files.length, skipped: false };
+}
+
+export { ALLOWLIST_FILENAME, FORBIDDEN_KEYWORDS, FORBIDDEN_IMPORT_NAMES, listFiles };
+
+function main() {
+  const targetDir = path.resolve(process.argv[2] ?? "src");
+
+  const { report, scannedCount, skipped } = scanDirectory(targetDir);
+
+  if (skipped) {
+    console.log(`policy-check: 대상 경로가 없어 건너뜁니다 (${targetDir})`);
+    process.exit(0);
   }
 
   if (report.length > 0) {
@@ -135,8 +150,11 @@ function main() {
     process.exit(1);
   }
 
-  console.log(`policy-check: 위반 0건 (${files.length}개 파일 검사)`);
+  console.log(`policy-check: 위반 0건 (${scannedCount}개 파일 검사)`);
   process.exit(0);
 }
 
-main();
+// 직접 실행할 때만 검사를 돌린다(import 시 부작용 없음).
+if (process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {
+  main();
+}

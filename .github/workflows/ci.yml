@@ -1,0 +1,30 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Install dependencies
+        run: npm install
+
+      # 정책(금지 키워드) + 필수 의존성 보존을 한 번에 검증한다.
+      # prebuild에도 걸려 있어 npm run build 경로에서도 자동 실행된다.
+      - name: Verify compliance (policy + essential dependencies)
+        run: npm run verify-compliance
+
+      - name: Typecheck
+        run: npm run typecheck
+
+      - name: Test
+        run: npx vitest run

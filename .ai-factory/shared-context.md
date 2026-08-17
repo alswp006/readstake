@@ -60,6 +60,7 @@ export type verifyComplianceFn = () => Promise<ComplianceCheckResult>;
 
 ## Existing Codebase (import and use these — do NOT recreate)
 ### File Tree (src/)
+  **/
   App.tsx
   app/
     challenge/
@@ -75,7 +76,9 @@ export type verifyComplianceFn = () => Promise<ComplianceCheckResult>;
   pages/
     ChallengeDetail.tsx
     Home.tsx
+    ProbePage.tsx
     Result.tsx
+  screens/
   types/
     index.ts
 
@@ -102,9 +105,7 @@ CRITICAL: Before creating any new function, type, or component, check the list a
 - heal-1-01: 금전 예치·재분배 도메인을 비금전 챌린지 모델로 치환 (files: spec/app-spec.md, src/types/index.ts, src/lib/schema.ts, src/lib/db.ts, src/lib/challenge.ts, src/lib/points.ts, migrations/)
 - heal-1-02: 결제·정산 관련 화면과 카피를 비금전 UI로 전환 (files: src/app/, src/components/, src/app/challenge/[id]/page.tsx, src/app/result/page.tsx, src/components/OnboardingNotice.tsx)
 - heal-1-03: 정책 준수 자체검증 가드 추가 (files: scripts/policy-check.mjs, package.json, README.md)
-
-## TDD 상태
-⚠️ TDD 테스트 파일 자동 작성에 실패했습니다. 소스 코드를 작성하기 전에 `src/__tests__/packet-XXXX.test.ts` 파일에 AC 기반 테스트를 먼저 작성하세요 (TDD red phase). 테스트 작성 후 구현하세요.
+- heal-2-02: 비금전 챌린지 화면을 TDS 컴포넌트로 원복 (files: src/**/*.tsx, src/components/**, src/pages/**, src/screens/**)
 
 ## Available exports from existing files
 // src/App.tsx

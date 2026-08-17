@@ -1,7 +1,9 @@
 import { describe, it, expect, beforeEach, afterEach } from "vitest";
 import { spawnSync } from "node:child_process";
-import { readFileSync, writeFileSync, mkdtempSync, existsSync, rmSync, mkdirSync, readdirSync } from "node:fs";
-import { join, relative, extname, sep } from "node:path";
+import fs from "node:fs";
+import path from "node:path";
+import { readFileSync, mkdtempSync, existsSync, rmSync } from "node:fs";
+import { join } from "node:path";
 import { tmpdir } from "node:os";
 
 describe("필수 의존성 삭제 방지 가드를 정책 가드에 통합 (heal-2-03)", () => {
