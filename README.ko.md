@@ -1,6 +1,6 @@
-🇰🇷 [한국어](./README.ko.md)
+🇺🇸 [English](./README.md)
 
-# Challenge Gamification App
+# 챌린지 게이미피케이션 앱
 
 목표 기반 챌린지에 참여하고 매일 완료 여부를 기록하는 앱. 연속 기록(스트릭)을
 추적하고, 챌린지를 완주하면 포인트와 배지를 준다.
@@ -18,7 +18,7 @@
 중단시킨다. 고지 문구처럼 정당한 예외가 필요하면 스캔 대상 디렉터리에
 `.policy-allowlist` 파일을 두고 해당 파일 경로를 명시적으로 등록해야 한다.
 
-## Commands
+## 명령어
 
 ```bash
 npm install
