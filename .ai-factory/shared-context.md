@@ -1,19 +1,80 @@
 # Shared Context (auto-generated — do NOT modify)
 
 
+## 패킷 간 계약 (src/lib/contract.ts — 자동 생성, 수정 금지)
+여기 선언된 이름·인자·반환 타입은 확정이다. 기반 패킷은 이대로 구현하고,
+화면 패킷은 이대로 호출하라. 다르게 만들지 마라.
+
+```typescript
+/**
+ * 패킷 간 인터페이스 계약 — 자동 생성. **수정하지 마라.**
+ *
+ * 기반 패킷은 여기 선언된 모양 그대로 구현하고, 화면 패킷은 여기 적힌 이름·인자·반환
+ * 타입을 그대로 가정해도 된다. 추측이 어긋나 병합에서 무너지는 것을 막기 위한 파일이다.
+ */
+
+/** 챌린지 엔티티. heal-1-02 UI에서 표시/관리 (구현: 패킷 heal-1-01) */
+export type Challenge = { id: string; name: string; description: string; targetPoints: number; startDate: string; endDate: string; status: 'active' | 'completed' | 'draft' };
+
+/** 사용자 포인트 현황. heal-1-02 결과 화면에서 표시 (구현: 패킷 heal-1-01) */
+export type UserPoints = { userId: string; totalPoints: number; currentRank: number; lastUpdatedAt: string };
+
+/** 챌린지별 진행상황. heal-1-02에서 UI 갱신에 사용 (구현: 패킷 heal-1-01) */
+export type ChallengeProgress = { challengeId: string; userId: string; pointsEarned: number; completedAt?: string; status: 'pending' | 'completed' };
+
+/** heal-1-02의 challenge/[id]/page.tsx에서 상세 조회 (구현: 패킷 heal-1-01) */
+export type getChallengeByIdFn = (id: string) => Promise<Challenge | null>;
+
+/** heal-1-02의 챌린지 목록 페이지에서 조회 (구현: 패킷 heal-1-01) */
+export type listChallengesFn = (filters?: { status?: string; limit?: number }) => Promise<Challenge[]>;
+
+/** heal-1-02의 result/page.tsx에서 포인트 표시 (구현: 패킷 heal-1-01) */
+export type getUserPointsFn = (userId: string) => Promise<UserPoints | null>;
+
+/** heal-1-02 UI에서 챌린지 완료 기록 (구현: 패킷 heal-1-01) */
+export type recordChallengeCompletionFn = (userId: string, challengeId: string, pointsEarned: number) => Promise<void>;
+
+/** heal-1-02에서 포인트 계산/표시용 (구현: 패킷 heal-1-01) */
+export type calculatePointsFn = (challengeId: string) => number;
+
+/** heal-1-02에서 포인트 UI 포맷팅 (예: '1,250 점') (구현: 패킷 heal-1-01) */
+export type formatPointsDisplayFn = (points: number) => string;
+
+/** 정책 위반 사항. heal-1-03/heal-2-03 검증 결과 타입 (구현: 패킷 heal-1-03) */
+export type PolicyViolation = { code: string; message: string; severity: 'error' | 'warning'; context?: Record<string, any> };
+
+/** 정책 준수 검증. heal-2-03에서 통합 검증에 포함 (구현: 패킷 heal-1-03) */
+export type validatePoliciesFn = () => Promise<PolicyViolation[]>;
+
+/** 통합 준수 검증 결과. CI/CD 워크플로우에서 사용 (구현: 패킷 heal-2-03) */
+export type ComplianceCheckResult = { passed: boolean; violations: PolicyViolation[]; timestamp: string };
+
+/** .github/workflows/ci.yml에서 호출. 정책+의존성 통합 검증 (구현: 패킷 heal-2-03) */
+export type verifyComplianceFn = () => Promise<ComplianceCheckResult>;
+
+```
+
 ## Proven Patterns (from "MealBudgetPlanner" — adapt, don't copy)
   DB: interface MonthlyBudget{month:string;amount:number;createdAt:number;updatedAt:number} key mbp_budget_v1; interface MealRecord{id,date,mealType,categor
   DB: key mbp_meals_v1: MealRecord[]; key mbp_budget_v1: Record<string,MonthlyBudget>; key mbp_checkins_v1: DailyCheckIn[]; key mbp_flags_v1: AppFlags
 
 ## Existing Codebase (import and use these — do NOT recreate)
 ### File Tree (src/)
+  App.tsx
+  app/
+    challenge/
+    result/
   components/
+    OnboardingNotice.tsx
   lib/
     challenge.ts
     db.ts
     points.ts
     schema.ts
   pages/
+    ChallengeDetail.tsx
+    Home.tsx
+    Result.tsx
   types/
     index.ts
 
@@ -23,65 +84,19 @@
 - points.ts: export const POINTS_ARE_NON_REDEEMABLE = true as const; export function createPointsSystem(userId: string): PointsSystem; export function awardPoints( system: PointsSystem, amount: number, reason: string ): PointsSystem; export function calculateCurrentStreak(history: DailyProgress[]): number; export function calculateProgress( completed: number, target: number ):; export function addBadge( badgesEarned: string[], badgeId: string ): string[]; export function hasBadge(badgesEarned: string[], badgeId: string): boolean; export const badgeCatalog: BadgeDefinition[] = [
 - schema.ts: export interface TableSchema; export const challengesSchema: TableSchema =; export const participantsSchema: TableSchema =; export const pointsSystemSchema: TableSchema =; export const badgesSchema: TableSchema =; export const allSchemas: TableSchema[] = [ challengesSchema, participantsSchema, pointsSystemSchema, badgesSchema, ]
 
+### Components (src/components/)
+- OnboardingNotice.tsx: OnboardingNotice
+
 ### Module Dependencies (import graph)
   lib/challenge.ts → imports: types, lib/points
   lib/db.ts → imports: types, lib/schema
   lib/points.ts → imports: types
+  pages/ChallengeDetail.tsx → imports: lib/challenge
+  pages/Home.tsx → imports: lib/challenge, components/OnboardingNotice
+  pages/Result.tsx → imports: lib/challenge, lib/points
 CRITICAL: Before creating any new function, type, or component, check the list above. If something similar exists, import and use it.
 
 ## Already Implemented (do NOT duplicate or overwrite)
 - heal-1-01: 금전 예치·재분배 도메인을 비금전 챌린지 모델로 치환 (files: spec/app-spec.md, src/types/index.ts, src/lib/schema.ts, src/lib/db.ts, src/lib/challenge.ts, src/lib/points.ts, migrations/)
+- heal-1-02: 결제·정산 관련 화면과 카피를 비금전 UI로 전환 (files: src/app/, src/components/, src/app/challenge/[id]/page.tsx, src/app/result/page.tsx, src/components/OnboardingNotice.tsx)
 - heal-1-03: 정책 준수 자체검증 가드 추가 (files: scripts/policy-check.mjs, package.json, README.md)
-
-## Available exports from existing files
-// src/lib/challenge.ts
-export function calculateChallengeReward(input: ChallengeInput): RewardOutput {
-export function updateProgress(
-export function awardBadge(challenge: Challenge, badgeId: string): Challenge {
-export function createChallenge(
-export const seedChallenges: Challenge[] = [
-
-// src/lib/db.ts
-export const challengeStore = {
-export const participantStore = {
-export const pointsSystemStore = {
-export const badgeStore = {
-
-// src/lib/points.ts
-export const POINTS_ARE_NON_REDEEMABLE = true as const;
-export function createPointsSystem(userId: string): PointsSystem {
-export function awardPoints(
-export function calculateCurrentStreak(history: DailyProgress[]): number {
-export function calculateProgress(
-export function addBadge(
-export function hasBadge(badgesEarned: string[], badgeId: string): boolean {
-export const badgeCatalog: BadgeDefinition[] = [
-
-// src/lib/schema.ts
-export interface TableSchema {
-export const challengesSchema: TableSchema = {
-export const participantsSchema: TableSchema = {
-export const pointsSystemSchema: TableSchema = {
-export const badgesSchema: TableSchema = {
-export const allSchemas: TableSchema[] = [
-
-// src/types/index.ts
-export interface Challenge {
-export interface Participant {
-export interface PointsSystem {
-export interface PointsHistoryEntry {
-export interface BadgeDefinition {
-export interface DailyProgress {
-export interface ChallengeInput {
-export interface RewardOutput {
-
-## Memory Index (자동 학습 — 힌트로만 사용, 실제 코드 확인 필수)
-
-Available topics: deploy(1), general(5), testing(1), ui(4)
-
-Key lessons (verify against actual code before applying):
-- [deploy] 빌드 불안정 — 의존성 버전 고정, 빌드 전 typecheck 필수 (60%)
-- [general] 공용 기반 모듈(상수·저장소·계산 유틸)이 실제로 머지되기 전에는 이를 import하는 화면·훅 패킷을 머지하지 말고, 모든 머지 게이트에 타입체크와 프로덕션 빌드 통과(미해결 import 0건)를 필수로 걸어라. (60%)
-- [ui] 온보딩/인증 가드는 현재 경로가 목적지 경로와 같으면 리다이렉트를 건너뛰고, 상태 로딩 중에는 리다이렉트를 보류하라 — 그렇지 않으면 무한 루프나 초기 크래시로 전 라우트가 타임아웃된다. (60%)
-- [testing] 화면 구현 패킷을 돌리기 전에 플랫폼 SDK·결제/광고 컴포넌트·UI 라이브러리·스토리지 API를 감싼 공유 테스트 목 하네스를 먼저 확정하고, 에이전트가 임시 디버그 테스트 파일을 만들지 못하게 막아라. (60%)
-- [ui] 라우팅으로 진입하는 모든 화면은 location.state·조회 결과가 없거나 손상돼도 크래시 없이 빈 상태를 렌더해야 하고, 알 수 없는 경로는 홈으로 리다이렉트해 스모크 타임아웃을 없애라. (60%)
