@@ -9,6 +9,13 @@ export default function Home() {
     <div>
       <h1>챌린지</h1>
       <OnboardingNotice />
+      <button
+        type="button"
+        data-testid="points-status-link"
+        onClick={() => navigate("/points")}
+      >
+        내 포인트 현황 보기
+      </button>
       {seedChallenges.map((challenge) => (
         <section
           key={challenge.id}

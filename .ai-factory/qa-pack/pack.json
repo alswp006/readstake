@@ -1,0 +1,9 @@
+{
+  "app_id": "fac_readstake_2zy2",
+  "name": "ReadStake",
+  "base_url_env": "FAC_READSTAKE_2ZY2_BASE_URL",
+  "profile": "experimental",
+  "level": "smoke",
+  "created_by": "factory",
+  "created_at": "2026-08-18"
+}
