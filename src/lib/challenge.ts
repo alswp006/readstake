@@ -1,5 +1,6 @@
 import type { Challenge, ChallengeInput, RewardOutput } from "@/types";
 import { addBadge } from "@/lib/points";
+import { challengeStore } from "@/lib/db";
 
 /**
  * Calculates the reward for a single participant.
@@ -82,3 +83,16 @@ export const seedChallenges: Challenge[] = [
     60
   ),
 ];
+
+/**
+ * Challenges live in localStorage so progress/streak survive between visits.
+ * On first use the store is empty, so it's seeded from seedChallenges once.
+ */
+export function getStoredChallenges(): Challenge[] {
+  const stored = challengeStore.getAll();
+  if (stored.length > 0) {
+    return stored;
+  }
+  seedChallenges.forEach((challenge) => challengeStore.upsert(challenge));
+  return seedChallenges;
+}

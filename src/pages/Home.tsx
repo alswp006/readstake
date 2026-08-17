@@ -1,9 +1,10 @@
 import { useNavigate } from "react-router-dom";
-import { seedChallenges } from "@/lib/challenge";
+import { getStoredChallenges } from "@/lib/challenge";
 import OnboardingNotice from "@/components/OnboardingNotice";
 
 export default function Home() {
   const navigate = useNavigate();
+  const challenges = getStoredChallenges();
 
   return (
     <div>
@@ -16,7 +17,7 @@ export default function Home() {
       >
         내 포인트 현황 보기
       </button>
-      {seedChallenges.map((challenge) => (
+      {challenges.map((challenge) => (
         <section
           key={challenge.id}
           data-testid={`challenge-card-${challenge.id}`}

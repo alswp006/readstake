@@ -9,14 +9,22 @@ import {
 function readCollection<T>(storageKey: string): T[] {
   try {
     const raw = localStorage.getItem(storageKey);
-    return raw ? (JSON.parse(raw) as T[]) : [];
+    if (!raw) return [];
+    const parsed: unknown = JSON.parse(raw);
+    return Array.isArray(parsed) ? (parsed as T[]) : [];
   } catch {
     return [];
   }
 }
 
-function writeCollection<T>(storageKey: string, items: T[]): void {
-  localStorage.setItem(storageKey, JSON.stringify(items));
+/** Returns false (instead of throwing) when storage is unavailable or full — callers surface this to the user. */
+function writeCollection<T>(storageKey: string, items: T[]): boolean {
+  try {
+    localStorage.setItem(storageKey, JSON.stringify(items));
+    return true;
+  } catch {
+    return false;
+  }
 }
 
 export const challengeStore = {
@@ -26,7 +34,7 @@ export const challengeStore = {
   getById(id: string): Challenge | undefined {
     return this.getAll().find((challenge) => challenge.id === id);
   },
-  upsert(challenge: Challenge): void {
+  upsert(challenge: Challenge): boolean {
     const all = this.getAll();
     const index = all.findIndex((c) => c.id === challenge.id);
     if (index >= 0) {
@@ -34,7 +42,7 @@ export const challengeStore = {
     } else {
       all.push(challenge);
     }
-    writeCollection(challengesSchema.storageKey, all);
+    return writeCollection(challengesSchema.storageKey, all);
   },
 };
 
@@ -45,7 +53,7 @@ export const participantStore = {
   getByChallengeId(challengeId: string): Participant[] {
     return this.getAll().filter((p) => p.challengeId === challengeId);
   },
-  upsert(participant: Participant): void {
+  upsert(participant: Participant): boolean {
     const all = this.getAll();
     const index = all.findIndex((p) => p.id === participant.id);
     if (index >= 0) {
@@ -53,7 +61,7 @@ export const participantStore = {
     } else {
       all.push(participant);
     }
-    writeCollection(participantsSchema.storageKey, all);
+    return writeCollection(participantsSchema.storageKey, all);
   },
 };
 
@@ -63,7 +71,7 @@ export const pointsSystemStore = {
       (p) => p.userId === userId
     );
   },
-  upsert(system: PointsSystem): void {
+  upsert(system: PointsSystem): boolean {
     const all = readCollection<PointsSystem>(pointsSystemSchema.storageKey);
     const index = all.findIndex((p) => p.userId === system.userId);
     if (index >= 0) {
@@ -71,7 +79,7 @@ export const pointsSystemStore = {
     } else {
       all.push(system);
     }
-    writeCollection(pointsSystemSchema.storageKey, all);
+    return writeCollection(pointsSystemSchema.storageKey, all);
   },
 };
 
@@ -79,7 +87,7 @@ export const badgeStore = {
   getAll(): BadgeDefinition[] {
     return readCollection<BadgeDefinition>(badgesSchema.storageKey);
   },
-  seed(badges: BadgeDefinition[]): void {
-    writeCollection(badgesSchema.storageKey, badges);
+  seed(badges: BadgeDefinition[]): boolean {
+    return writeCollection(badgesSchema.storageKey, badges);
   },
 };

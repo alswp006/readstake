@@ -1,10 +1,12 @@
 import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { pointsSystemStore } from "@/lib/db";
 import { awardPoints, createPointsSystem } from "@/lib/points";
 import type { PointsSystem } from "@/types";
 
 const USER_ID = "me";
 const CHECK_IN_POINTS = 10;
+const NOTE_MAX_LENGTH = 200;
 
 function formatDate(timestamp: number): string {
   return new Date(timestamp).toLocaleDateString("ko-KR", {
@@ -14,9 +16,11 @@ function formatDate(timestamp: number): string {
 }
 
 export default function ProbePage() {
+  const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
   const [system, setSystem] = useState<PointsSystem | null>(null);
   const [note, setNote] = useState("");
+  const [saveError, setSaveError] = useState(false);
 
   useEffect(() => {
     setSystem(pointsSystemStore.get(USER_ID) ?? null);
@@ -28,7 +32,12 @@ export default function ProbePage() {
     if (!trimmed) return;
     const base = system ?? createPointsSystem(USER_ID);
     const updated = awardPoints(base, CHECK_IN_POINTS, trimmed);
-    pointsSystemStore.upsert(updated);
+    const saved = pointsSystemStore.upsert(updated);
+    if (!saved) {
+      setSaveError(true);
+      return;
+    }
+    setSaveError(false);
     setSystem(updated);
     setNote("");
   };
@@ -48,6 +57,9 @@ export default function ProbePage() {
   return (
     <div>
       <h1>포인트 현황</h1>
+      <button type="button" data-testid="probe-home-btn" onClick={() => navigate("/")}>
+        홈으로
+      </button>
       <p data-testid="probe-total-points">{totalPoints}P 보유 중</p>
 
       <section>
@@ -76,6 +88,7 @@ export default function ProbePage() {
           type="text"
           placeholder="예: 30분 러닝 완료"
           value={note}
+          maxLength={NOTE_MAX_LENGTH}
           onChange={(e) => setNote(e.target.value)}
         />
         <button
@@ -86,6 +99,11 @@ export default function ProbePage() {
         >
           기록하고 {CHECK_IN_POINTS}P 받기
         </button>
+        {saveError && (
+          <p data-testid="probe-save-error">
+            저장에 실패했어요. 기기 저장 공간을 확인하고 다시 시도해 주세요.
+          </p>
+        )}
       </section>
     </div>
   );

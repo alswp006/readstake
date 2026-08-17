@@ -1,4 +1,4 @@
-import { useLocation } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import { calculateChallengeReward } from "@/lib/challenge";
 import { badgeCatalog } from "@/lib/points";
 
@@ -9,19 +9,22 @@ interface ResultState {
   badgesEarned?: string[];
 }
 
-const MOCK_RANKING = [
-  { name: "지우", streak: 21 },
-  { name: "하늘", streak: 14 },
-  { name: "도윤", streak: 9 },
-];
+function toSafeStreak(value: unknown): number {
+  return typeof value === "number" && Number.isFinite(value) && value > 0
+    ? Math.floor(value)
+    : 0;
+}
 
 export default function Result() {
   const location = useLocation();
+  const navigate = useNavigate();
   const state = (location.state ?? {}) as ResultState;
 
-  const streak = state.streak ?? 0;
-  const completed = state.completed ?? false;
-  const badgesEarned = state.badgesEarned ?? [];
+  const streak = toSafeStreak(state.streak);
+  const completed = state.completed === true;
+  const badgesEarned = Array.isArray(state.badgesEarned)
+    ? state.badgesEarned.filter((id): id is string => typeof id === "string")
+    : [];
 
   const reward = calculateChallengeReward({
     participantId: "me",
@@ -29,10 +32,6 @@ export default function Result() {
     streak,
     badgesEarned,
   });
-
-  const ranking = [...MOCK_RANKING, { name: "나", streak }].sort(
-    (a, b) => b.streak - a.streak
-  );
 
   return (
     <div>
@@ -49,16 +48,9 @@ export default function Result() {
           })
         )}
       </ul>
-      <section data-testid="result-ranking">
-        <h2>랭킹</h2>
-        <ol>
-          {ranking.map((entry, index) => (
-            <li key={entry.name}>
-              {index + 1}위 · {entry.name} · 연속 {entry.streak}일
-            </li>
-          ))}
-        </ol>
-      </section>
+      <button type="button" data-testid="result-home-btn" onClick={() => navigate("/")}>
+        홈으로
+      </button>
     </div>
   );
 }
