@@ -106,6 +106,7 @@ CRITICAL: Before creating any new function, type, or component, check the list a
 - heal-1-02: 결제·정산 관련 화면과 카피를 비금전 UI로 전환 (files: src/app/, src/components/, src/app/challenge/[id]/page.tsx, src/app/result/page.tsx, src/components/OnboardingNotice.tsx)
 - heal-1-03: 정책 준수 자체검증 가드 추가 (files: scripts/policy-check.mjs, package.json, README.md)
 - heal-2-02: 비금전 챌린지 화면을 TDS 컴포넌트로 원복 (files: src/**/*.tsx, src/components/**, src/pages/**, src/screens/**)
+- heal-2-03: 필수 의존성 삭제 방지 가드를 정책 가드에 통합 (files: scripts/verify-compliance.mjs, package.json, .github/workflows/ci.yml)
 
 ## Available exports from existing files
 // src/App.tsx
