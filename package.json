@@ -5,7 +5,10 @@
   "scripts": {
     "test": "vitest",
     "test:ui": "vitest --ui",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "policy-check": "node scripts/policy-check.mjs src",
+    "prebuild": "npm run policy-check",
+    "build": "tsc --noEmit && vite build"
   },
   "dependencies": {
     "react": "^18.2.0",
