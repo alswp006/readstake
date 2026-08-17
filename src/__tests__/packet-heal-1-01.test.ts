@@ -41,7 +41,7 @@ describe("AC-1: 금전 관련 용어 제거", () => {
 
   it("should replace all financial terms with challenge/gamification terms", () => {
     const challengeModel = {
-      challengeGoal: "30-day exercise streak",
+      challengeGoal: "30-day exercise challenge streak",
       progress: 15, // days completed out of 30
       streak: 5, // current consecutive days
       points: 250, // non-redeemable gamification points
