@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { pointsSystemStore } from "@/lib/db";
 import { awardPoints, createPointsSystem } from "@/lib/points";
 import type { PointsSystem } from "@/types";
+import OnboardingNotice from "@/components/OnboardingNotice";
 
 const USER_ID = "me";
 const CHECK_IN_POINTS = 10;
@@ -60,6 +61,7 @@ export default function ProbePage() {
       <button type="button" data-testid="probe-home-btn" onClick={() => navigate("/")}>
         홈으로
       </button>
+      <OnboardingNotice />
       <p data-testid="probe-total-points">{totalPoints}P 보유 중</p>
 
       <section>

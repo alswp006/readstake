@@ -6,6 +6,7 @@ import {
   awardBadge,
 } from "@/lib/challenge";
 import { challengeStore } from "@/lib/db";
+import OnboardingNotice from "@/components/OnboardingNotice";
 
 export default function ChallengeDetail() {
   const { id } = useParams();
@@ -54,6 +55,7 @@ export default function ChallengeDetail() {
     <div>
       <h1>{challenge.title}</h1>
       <p>{challenge.challengeGoal}</p>
+      <OnboardingNotice />
       <button type="button" data-testid="verify-btn" onClick={handleVerify}>
         인증하기
       </button>

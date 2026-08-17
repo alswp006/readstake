@@ -86,26 +86,26 @@ export function hasBadge(badgesEarned: string[], badgeId: string): boolean {
 export const badgeCatalog: BadgeDefinition[] = [
   {
     id: "first-join",
-    name: "First Join",
-    description: "Join your first challenge",
+    name: "첫 참여",
+    description: "챌린지에 처음 참여했어요",
     icon: "🎯",
   },
   {
     id: "week-warrior",
-    name: "Week Warrior",
-    description: "Complete a 7-day streak",
+    name: "일주일 개근",
+    description: "7일 연속 기록을 달성했어요",
     icon: "⚡",
   },
   {
     id: "consistency-king",
-    name: "Consistency King",
-    description: "Log progress five days in a row",
+    name: "꾸준왕",
+    description: "5일 연속으로 진행 상황을 기록했어요",
     icon: "👑",
   },
   {
     id: "legendary",
-    name: "Legendary",
-    description: "Complete a 30-day streak",
+    name: "전설의 기록",
+    description: "30일 연속 기록을 달성했어요",
     icon: "🏆",
   },
 ];

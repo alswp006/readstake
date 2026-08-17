@@ -72,14 +72,14 @@ export function createChallenge(
 export const seedChallenges: Challenge[] = [
   createChallenge(
     "ch_morning_run",
-    "Morning Runner",
-    "Run 5km every morning for 30 days",
+    "아침 러닝 챌린지",
+    "매일 아침 5km씩, 30일 동안 달려요",
     30
   ),
   createChallenge(
     "ch_meal_prep",
-    "Meal Prep Master",
-    "Prep healthy meals 5 days a week for 60 days",
+    "건강 식단 챌린지",
+    "일주일에 5일, 60일 동안 건강한 식사를 준비해요",
     60
   ),
 ];

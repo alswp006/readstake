@@ -1,6 +1,7 @@
 import { useNavigate, useLocation } from "react-router-dom";
 import { calculateChallengeReward } from "@/lib/challenge";
 import { badgeCatalog } from "@/lib/points";
+import OnboardingNotice from "@/components/OnboardingNotice";
 
 interface ResultState {
   challengeId?: string;
@@ -36,6 +37,7 @@ export default function Result() {
   return (
     <div>
       <h1>결과</h1>
+      <OnboardingNotice />
       <p data-testid="result-points">{reward.pointsAwarded}P 획득</p>
       <p data-testid="result-streak">연속 {streak}일 달성</p>
       <ul data-testid="result-badges">
